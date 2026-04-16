@@ -1,0 +1,10 @@
+.git
+node_modules/
+.gitignore
+# Explicitly include the dist folder
+!dist
+!dist/*
+!dist/**/*
+# Include the config files
+!Dockerfile
+!nginx.conf
