@@ -16,6 +16,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import FanAppSimulator from './FanAppSimulator';
 import StaffDispatch from './StaffDispatch';
 import ConcessionsCommand from './ConcessionsCommand';
+import { useDigitalTwin } from './hooks/useDigitalTwin';
 
 const mockChartData = [
   { time: '18:00', density: 12 },
@@ -30,6 +31,7 @@ const mockChartData = [
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   const [activeTab, setActiveTab] = useState<'dashboard' | 'fanapp' | 'staff' | 'concessions'>('dashboard');
+  const { state, isConnected, error } = useDigitalTwin();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -131,10 +133,27 @@ function App() {
         ) : (
           <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
             
+            <HeaderAlert error={error} isConnected={isConnected} />
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '32px' }}>
-            <StatCard title="Current Attendance" value="18,482" trend="+1,200 / 15m" type="info" />
-            <StatCard title="Avg Gate Wait" value="4m 12s" trend="-30s vs Avg" type="success" />
-            <StatCard title="Concession Wait" value="8m 45s" trend="+2m (High)" type="warning" />
+            <StatCard 
+              title="Current Attendance" 
+              value={state?.zones.reduce((acc, z) => acc + z.occupancy, 0).toLocaleString() || "..."} 
+              trend="+1,200 / 15m" 
+              type="info" 
+            />
+            <StatCard 
+              title="Avg Gate Wait" 
+              value={state ? "4m 12s" : "..."} 
+              trend="-30s vs Avg" 
+              type="success" 
+            />
+            <StatCard 
+              title="Concession Wait" 
+              value={state ? `${Math.floor(state.stands[0].wait_time / 60)}m ${state.stands[0].wait_time % 60}s` : "..."} 
+              trend="+2m (High)" 
+              type="warning" 
+            />
             <StatCard title="Predicted Spend" value="$42.50" trend="+12% pre-game" type="success" />
           </div>
 
@@ -156,15 +175,20 @@ function App() {
               }}>
                 <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
                   <MapIcon size={48} opacity={0.5} style={{ margin: '0 auto 16px', display: 'block' }} />
-                  <p style={{ margin: 0 }}>Initializing Map Rendering Engine...</p>
-                  <p style={{ fontSize: '0.8rem', margin: '4px 0 0 0' }}>(Zone overlays are mock data)</p>
+                  <p style={{ margin: 0 }}>{isConnected ? "Streaming Spatial Twin..." : "Connecting to Edge Node..."}</p>
+                  <p style={{ fontSize: '0.8rem', margin: '4px 0 0 0' }}>({state?.timestamp})</p>
                 </div>
                 
-                {/* Simulated Heatmap Blips */}
-                <HeatmapNode top="40%" left="30%" color="var(--status-success)" />
-                <HeatmapNode top="25%" left="70%" color="var(--status-critical)" pulse />
-                <HeatmapNode top="65%" left="55%" color="var(--status-warning)" />
-                <HeatmapNode top="80%" left="20%" color="var(--status-info)" />
+                {/* Live State Heatmap Nodes */}
+                {state?.zones.map((zone, i) => (
+                  <HeatmapNode 
+                    key={zone.id}
+                    top={i === 0 ? "40%" : i === 1 ? "25%" : "65%"} 
+                    left={i === 0 ? "30%" : i === 1 ? "70%" : "55%"} 
+                    color={zone.density > 0.8 ? "var(--status-critical)" : zone.density > 0.5 ? "var(--status-warning)" : "var(--status-success)"} 
+                    pulse={zone.density > 0.8}
+                  />
+                ))}
               </div>
             </div>
 
@@ -215,6 +239,28 @@ function NavItem({ icon, label, active = false, onClick }: { icon: React.ReactNo
       {icon}
       {label}
     </button>
+  );
+}
+
+function HeaderAlert({ error, isConnected }: { error: string | null, isConnected: boolean }) {
+  if (!error && isConnected) return null;
+  
+  return (
+    <div style={{
+      marginBottom: '24px',
+      padding: '12px 16px',
+      borderRadius: '8px',
+      background: isConnected ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+      border: `1px solid ${isConnected ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+      color: isConnected ? 'var(--status-success)' : 'var(--status-critical)',
+      fontSize: '0.9rem',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px'
+    }}>
+      <AlertTriangle size={16} />
+      {error || (isConnected ? 'Backend Connected' : 'Connecting to Digital Twin Backend...')}
+    </div>
   );
 }
 
