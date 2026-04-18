@@ -20,7 +20,6 @@ incidents = [
     { "id": "INC-042", "zone": "Gate B", "type": "Bottleneck", "description": "Throughput exceeding 85% capacity.", "severity": "high", "status": "active", "time": "18:42" },
 ]
 
-@app_router := APIRouter() # Renamed to avoid name clash if needed, but router is standard
 
 @router.get("/incidents", response_model=List[Incident])
 async def get_incidents():
