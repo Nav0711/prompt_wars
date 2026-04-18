@@ -1,5 +1,5 @@
 import { GoogleLogin } from '@react-oauth/google';
-import { Zap, ShieldCheck } from 'lucide-react';
+import { Zap, ShieldCheck, UserCircle2 } from 'lucide-react';
 
 interface LoginProps {
   onSuccess: (credential: string) => void;
@@ -53,7 +53,7 @@ export function Login({ onSuccess, onError }: LoginProps) {
           Sign in to access the SmartVenue AI Command Center and Digital Twin analytics.
         </p>
 
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', background: '#fff', borderRadius: '4px', overflow: 'hidden' }}>
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', background: '#fff', borderRadius: '4px', overflow: 'hidden', marginBottom: '16px' }}>
           <GoogleLogin
             onSuccess={(credentialResponse) => {
               if (credentialResponse.credential) {
@@ -70,6 +70,22 @@ export function Login({ onSuccess, onError }: LoginProps) {
             shape="rectangular"
           />
         </div>
+
+        <div style={{ position: 'relative', width: '100%', margin: '16px 0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', width: '100%', height: '1px', background: 'var(--border-subtle)' }} />
+          <span style={{ position: 'relative', background: 'var(--bg-base)', padding: '0 12px', fontSize: '0.85rem', color: 'var(--text-muted)', zIndex: 1, borderRadius: '4px' }}>OR</span>
+        </div>
+
+        <button 
+          onClick={() => {
+            // Provide a mock token/identifier for the demo account bypass
+            onSuccess("DEMO_ACCOUNT");
+          }}
+          className="btn" 
+          style={{ width: '100%', padding: '12px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--border-subtle)', color: 'var(--text-primary)' }}
+        >
+          <UserCircle2 size={20} /> Use Demo Account
+        </button>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '32px', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
           <ShieldCheck size={16} /> Restricted access for authorized personnel only
