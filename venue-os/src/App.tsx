@@ -17,6 +17,8 @@ import FanAppSimulator from './FanAppSimulator';
 import StaffDispatch from './StaffDispatch';
 import ConcessionsCommand from './ConcessionsCommand';
 import { useDigitalTwin } from './hooks/useDigitalTwin';
+import { Login } from './Login';
+import { jwtDecode } from 'jwt-decode';
 
 const mockChartData = [
   { time: '18:00', density: 12 },
@@ -29,6 +31,9 @@ const mockChartData = [
 ];
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   const [activeTab, setActiveTab] = useState<'dashboard' | 'fanapp' | 'staff' | 'concessions'>('dashboard');
   const { state, isConnected, error } = useDigitalTwin();
@@ -39,6 +44,23 @@ function App() {
     }, 60000);
     return () => clearInterval(timer);
   }, []);
+
+  if (!isAuthenticated) {
+    return (
+      <Login 
+        onSuccess={(credential) => {
+          try {
+            const decoded = jwtDecode(credential);
+            setUserProfile(decoded);
+            setIsAuthenticated(true);
+          } catch (err) {
+            console.error('Invalid token', err);
+          }
+        }}
+        onError={() => alert('Login verification failed. Please try again.')}
+      />
+    );
+  }
 
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden' }}>
@@ -111,7 +133,7 @@ function App() {
               <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
               <input 
                 type="text" 
-                placeholder="Search staff, zones, alerts..." 
+                placeholder="Search staff, alerts..." 
                 style={{
                   background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)',
                   borderRadius: '100px', padding: '10px 16px 10px 40px', color: 'var(--text-primary)',
@@ -120,6 +142,14 @@ function App() {
               />
             </div>
             <button className="btn-icon"><Bell size={20} /></button>
+            <div 
+              title={userProfile?.email}
+              style={{
+                width: '36px', height: '36px', borderRadius: '50%',
+                background: userProfile?.picture ? `url(${userProfile.picture}) center/cover` : 'var(--accent-primary)',
+                marginLeft: '8px', border: '2px solid var(--border-subtle)', flexShrink: 0
+              }} 
+            />
           </div>
         </header>
 
