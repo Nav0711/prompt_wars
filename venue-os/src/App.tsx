@@ -63,20 +63,11 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+    <div className="app-layout">
       
       {/* Sidebar */}
-      <aside style={{
-        width: '260px',
-        background: 'var(--bg-surface)',
-        backdropFilter: 'blur(16px)',
-        borderRight: '1px solid var(--border-subtle)',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '24px 16px',
-        zIndex: 10
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px', padding: '0 8px' }}>
+      <aside className="sidebar">
+        <div className="sidebar-header" style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px', padding: '0 8px' }}>
           <div style={{ 
             background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)',
             width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'
@@ -86,7 +77,7 @@ function App() {
           <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, letterSpacing: '0.02em', color: '#fff' }}>VenueOS</h2>
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <nav className="sidebar-nav">
           <NavItem icon={<MapIcon size={20} />} label="Live Map" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
           <NavItem icon={<MessageSquare size={20} />} label="FanApp Concierge" active={activeTab === 'fanapp'} onClick={() => setActiveTab('fanapp')} />
           <NavItem icon={<Activity size={20} />} label="Command Center" />
@@ -94,7 +85,7 @@ function App() {
           <NavItem icon={<Users size={20} />} label="Staff Dispatch" active={activeTab === 'staff'} onClick={() => setActiveTab('staff')} />
         </nav>
 
-        <div style={{ marginTop: 'auto' }}>
+        <div className="sidebar-alert">
           <div className="glass-panel" style={{ padding: '16px', background: 'rgba(0, 229, 255, 0.05)', borderColor: 'rgba(0, 229, 255, 0.2)' }}>
             <h4 style={{ color: 'var(--accent-primary)', fontSize: '0.85rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', margin: '0 0 8px 0' }}>
               <AlertTriangle size={14} /> AI Alert
@@ -110,35 +101,22 @@ function App() {
       </aside>
 
       {/* Main Content */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <main className="main-content">
         
         {/* Header */}
-        <header style={{
-          height: '80px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 32px',
-          borderBottom: '1px solid var(--border-subtle)',
-          background: 'rgba(6, 8, 15, 0.6)',
-          backdropFilter: 'blur(8px)'
-        }}>
+        <header className="app-header">
           <div>
             <h1 style={{ fontSize: '1.25rem', margin: 0, color: '#fff', background: 'none', WebkitTextFillColor: 'initial', letterSpacing: 'normal' }}>National Stadium • Main Event</h1>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>Gate Opens: {currentTime} — Expected: 55,000</p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ position: 'relative' }}>
+          <div className="header-controls">
+            <div className="search-input-wrapper">
               <Search style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
               <input 
                 type="text" 
                 placeholder="Search staff, alerts..." 
-                style={{
-                  background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)',
-                  borderRadius: '100px', padding: '10px 16px 10px 40px', color: 'var(--text-primary)',
-                  fontSize: '0.9rem', width: '280px', outline: 'none'
-                }}
+                className="search-input"
               />
             </div>
             <button className="btn-icon"><Bell size={20} /></button>
@@ -161,11 +139,11 @@ function App() {
         ) : activeTab === 'concessions' ? (
           <ConcessionsCommand />
         ) : (
-          <div style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
+          <div className="main-view-area">
             
             <HeaderAlert error={error} isConnected={isConnected} />
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '32px' }}>
+            <div className="stats-grid">
             <StatCard 
               title="Current Attendance" 
               value={state?.zones.reduce((acc, z) => acc + z.occupancy, 0).toLocaleString() || "..."} 
@@ -187,7 +165,7 @@ function App() {
             <StatCard title="Predicted Spend" value="$42.50" trend="+12% pre-game" type="success" />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+          <div className="map-grid">
             
             {/* Live Map Area */}
             <div className="glass-panel" style={{ height: '500px', padding: '24px', display: 'flex', flexDirection: 'column' }}>
