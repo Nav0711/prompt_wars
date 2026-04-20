@@ -1,8 +1,16 @@
 import { useNavigate } from 'react-router-dom';
 import { Zap, Map, MessageSquare, ArrowRight } from 'lucide-react';
 
-export default function Landing() {
+interface LandingProps {
+  isAuthenticated?: boolean;
+}
+
+export default function Landing({ isAuthenticated = false }: LandingProps) {
   const navigate = useNavigate();
+
+  const handleCTA = () => {
+    navigate(isAuthenticated ? '/dashboard' : '/login');
+  };
 
   return (
     <div style={{
@@ -34,8 +42,8 @@ export default function Landing() {
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: '#fff' }}>VenueOS</h2>
           </div>
           <div>
-            <button onClick={() => navigate('/login')} className="btn btn-primary" style={{ padding: '12px 24px', borderRadius: '100px' }}>
-              Access Prototype
+            <button onClick={handleCTA} className="btn btn-primary" style={{ padding: '12px 24px', borderRadius: '100px' }}>
+              {isAuthenticated ? 'Go to Dashboard' : 'Access Prototype'}
             </button>
           </div>
         </header>
@@ -49,8 +57,8 @@ export default function Landing() {
             Unify your stadium operations with a real-time spatial digital twin, predictive analytics, and a powerful RAG-powered "Sixth Man" Concierge for fans.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
-            <button onClick={() => navigate('/login')} className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '1.1rem', borderRadius: '100px' }}>
-              Enter Command Center <ArrowRight size={20} />
+            <button onClick={handleCTA} className="btn btn-primary" style={{ padding: '16px 32px', fontSize: '1.1rem', borderRadius: '100px' }}>
+              {isAuthenticated ? 'Go to Dashboard' : 'Enter Command Center'} <ArrowRight size={20} />
             </button>
           </div>
         </div>

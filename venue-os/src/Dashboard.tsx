@@ -22,6 +22,7 @@ import { useDigitalTwin } from './hooks/useDigitalTwin';
 
 interface DashboardProps {
   userProfile: any;
+  onLogout: () => void;
 }
 
 const mockChartData = [
@@ -34,7 +35,7 @@ const mockChartData = [
   { time: '19:30', density: 50 },
 ];
 
-export default function Dashboard({ userProfile }: DashboardProps) {
+export default function Dashboard({ userProfile, onLogout }: DashboardProps) {
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   const [activeTab, setActiveTab] = useState<'dashboard' | 'fanapp' | 'staff' | 'concessions'>('dashboard');
   const { state, isConnected, error } = useDigitalTwin();
@@ -47,8 +48,7 @@ export default function Dashboard({ userProfile }: DashboardProps) {
   }, []);
 
   const handleLogout = () => {
-    // Force full page reload to clear auth state
-    window.location.href = '/';
+    onLogout();
   };
 
   return (
