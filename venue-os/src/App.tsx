@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Landing from './Landing';
 import { Login } from './Login';
@@ -12,6 +12,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasLanded, setHasLanded] = useState<boolean>(false);
 
   // Restore auth state from localStorage on mount
   useEffect(() => {
@@ -58,6 +59,7 @@ function App() {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     setUserProfile(null);
     setIsAuthenticated(false);
+    setHasLanded(false);
   }, []);
 
   // Show nothing while checking stored auth to prevent flash
@@ -85,26 +87,74 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Landing isAuthenticated={isAuthenticated} />} />
-        <Route 
-          path="/login" 
-          element={
-            isAuthenticated ? 
-              <Navigate to="/dashboard" replace /> : 
-              <Login onSuccess={handleLoginSuccess} onError={() => alert('Login failed.')} />
-          } 
-        />
-        <Route 
-          path="/dashboard" 
-          element={
-            isAuthenticated ? 
-              <Dashboard userProfile={userProfile} onLogout={handleLogout} /> : 
-              <Navigate to="/login" replace />
-          } 
-        />
-      </Routes>
+      <AppRoutes
+        isAuthenticated={isAuthenticated}
+        userProfile={userProfile}
+        hasLanded={hasLanded}
+        setHasLanded={setHasLanded}
+        onLoginSuccess={handleLoginSuccess}
+        onLogout={handleLogout}
+      />
     </Router>
+  );
+}
+
+/**
+ * Separate component inside Router so it can use useLocation().
+ * On every fresh page load / reload, the user is redirected to "/"
+ * (the Landing page) first. Once they've seen the landing page in
+ * this component instance, in-app navigation works normally.
+ */
+function AppRoutes({
+  isAuthenticated,
+  userProfile,
+  hasLanded,
+  setHasLanded,
+  onLoginSuccess,
+  onLogout,
+}: {
+  isAuthenticated: boolean;
+  userProfile: any;
+  hasLanded: boolean;
+  setHasLanded: (val: boolean) => void;
+  onLoginSuccess: (credential: string) => void;
+  onLogout: () => void;
+}) {
+  const location = useLocation();
+
+  // Mark that the user has visited the landing page
+  useEffect(() => {
+    if (location.pathname === '/') {
+      setHasLanded(true);
+    }
+  }, [location.pathname, setHasLanded]);
+
+  // If this is a fresh load and user hasn't seen the landing page yet,
+  // redirect them to "/" first (e.g. direct /dashboard URL or reload on /login)
+  if (!hasLanded && location.pathname !== '/') {
+    return <Navigate to="/" replace />;
+  }
+
+  return (
+    <Routes>
+      <Route path="/" element={<Landing isAuthenticated={isAuthenticated} />} />
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ?
+            <Navigate to="/dashboard" replace /> :
+            <Login onSuccess={onLoginSuccess} onError={() => alert('Login failed.')} />
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          isAuthenticated ?
+            <Dashboard userProfile={userProfile} onLogout={onLogout} /> :
+            <Navigate to="/login" replace />
+        }
+      />
+    </Routes>
   );
 }
 
